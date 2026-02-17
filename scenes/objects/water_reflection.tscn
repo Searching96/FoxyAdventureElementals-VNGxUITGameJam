@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://cy3uch5sn63wf"]
 
-[ext_resource type="Shader" uid="uid://cn08g737h2o3b" path="res://shaders/water_refelection/water_refelection.gdshader" id="1_p6xlp"]
-[ext_resource type="Script" uid="uid://bihk4muna3fpl" path="res://shaders/water_refelection/water.gd" id="2_fbpu4"]
+[ext_resource type="Shader" uid="uid://cn08g737h2o3b" path="res://shaders/water_reflection/water_reflection.gdshader" id="1_p6xlp"]
+[ext_resource type="Script" uid="uid://bihk4muna3fpl" path="res://shaders/water_reflection/water.gd" id="2_fbpu4"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_omn1t"]
 

@@ -19,9 +19,9 @@
 [ext_resource type="Texture2D" uid="uid://d0b0yg85xphrg" path="res://assets/island/background/water_reflect_small_03.png" id="30_w6f4e"]
 [ext_resource type="Texture2D" uid="uid://o4iqthotrkum" path="res://assets/island/background/water_reflect_small_04.png" id="31_debd5"]
 [ext_resource type="Texture2D" uid="uid://m5yds3bm8pou" path="res://assets/island/background/big_clouds.png" id="32_o76ta"]
-[ext_resource type="Shader" uid="uid://cn08g737h2o3b" path="res://shaders/water_refelection/water_refelection.gdshader" id="32_u460r"]
+[ext_resource type="Shader" uid="uid://cn08g737h2o3b" path="res://shaders/water_reflection/water_reflection.gdshader" id="32_u460r"]
 [ext_resource type="Texture2D" uid="uid://ci5tpl05cnmra" path="res://assets/island/background/small_cloud_1.png" id="33_0rfg2"]
-[ext_resource type="Script" uid="uid://bihk4muna3fpl" path="res://shaders/water_refelection/water.gd" id="33_6h1n3"]
+[ext_resource type="Script" uid="uid://bihk4muna3fpl" path="res://shaders/water_reflection/water.gd" id="33_6h1n3"]
 [ext_resource type="Texture2D" uid="uid://1t3pkyls8wyt" path="res://assets/island/background/small_cloud_2.png" id="34_42hpr"]
 [ext_resource type="Texture2D" uid="uid://dcvs45slp2tv3" path="res://assets/island/background/small_cloud_3.png" id="35_wprx8"]
 [ext_resource type="FontFile" uid="uid://bg5tapse57x18" path="res://assets/fonts/PixelOperator8.ttf" id="56_ioufq"]
@@ -138,7 +138,7 @@ shader_parameter/fast_noise = SubResource("NoiseTexture2D_lf3p4")
 shader_parameter/speed = Vector2(0.01, 0.02)
 shader_parameter/wave_strength = 1.5
 shader_parameter/scale_y = 450.0
-shader_parameter/y_zoom = 1.0
+shader_parameter/y_zoom = 0.385543
 shader_parameter/surface_speed = 3.0
 shader_parameter/surface_frequency = 10.0
 shader_parameter/surface_amplitude = 0.02

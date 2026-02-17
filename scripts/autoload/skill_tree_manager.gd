@@ -28,13 +28,13 @@ func consume_skill_use(skill_name: String) -> void:
 	_stacks[skill_name] = current_stacks - 1
 	stack_changed.emit(skill_name, _stacks[skill_name])
 	
-	print("Used 1 stack of %s (Remaining: %d)" % [skill_name, _stacks[skill_name]])
+	GameManager.logger.debug("Used 1 stack of %s (Remaining: %d)" % [skill_name, _stacks[skill_name]])
 
 	if _stacks[skill_name] <= 0:
 		var slot_index = find_skill_slot(skill_name)
 		if slot_index != -1:
 			unequip_skill(slot_index)
-			print("%s ran out! Unequipping..." % skill_name)
+			GameManager.logger.debug("%s ran out! Unequipping..." % skill_name)
 
 func collect_skill(skill_name: String, stack_amount: int = 1) -> void:
 	GameProgressManager.trigger_event("SKILL_SCROLL")
@@ -52,7 +52,7 @@ func collect_skill(skill_name: String, stack_amount: int = 1) -> void:
 	if get_stacks(skill_name) == 0 and stack_amount > 0:
 		skill_discovered.emit(skill_name)
 		_skills_discovered_history[skill_name] = true
-		print("✨ NEW SKILL DISCOVERED: %s" % skill_name)
+		GameManager.logger.info("New skill discovered: %s" % skill_name)
 	
 	_add_stacks(skill_name, stack_amount)
 	
@@ -66,11 +66,11 @@ func collect_skill(skill_name: String, stack_amount: int = 1) -> void:
 
 			if empty_slot != -1:
 				equip_skill(empty_slot, skill_name)
-				print("⚡ Auto-equipped %s to slot %d" % [skill_name, empty_slot])
+				GameManager.logger.debug("Auto-equipped %s to slot %d" % [skill_name, empty_slot])
 		
-	print("📦 Collected +%d %s (Total: %d stacks, Level: %d)" % [
-		stack_amount, 
-		skill_name, 
+	GameManager.logger.debug("Collected +%d %s (Total: %d stacks, Level: %d)" % [
+		stack_amount,
+		skill_name,
 		get_stacks(skill_name),
 		get_level(skill_name)
 	])
@@ -212,7 +212,7 @@ func load_data(data: Dictionary) -> void:
 	if data.is_empty():
 		return
 	
-	print("📂 LOADING SkillTreeManager...")
+	GameManager.logger.debug("Loading SkillTreeManager...")
 	
 	_skill_data = data.get("skill_data", {}).duplicate(true)
 	_stacks = data.get("stacks", {}).duplicate()
@@ -229,5 +229,5 @@ func load_data(data: Dictionary) -> void:
 		else:
 			_skillbar[i] = null
 			
-	print("✅ Load Complete. Syncing UI...")
+	GameManager.logger.debug("SkillTreeManager load complete. Syncing UI...")
 	state_changed.emit(get_state())

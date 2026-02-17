@@ -13,7 +13,7 @@ func _enter() -> void:
 func _exit() -> void:
 	pass
 
-func _update( _delta ):
+func _update(_delta: float) -> void:
 	pass
 
 # Update timer and return true if timer is finished

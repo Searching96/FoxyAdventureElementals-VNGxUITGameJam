@@ -1,6 +1,5 @@
 class_name NoLogger
 extends Logger
 
-func log(message: String) -> void:
-	# Do nothing
+func log(_message: String, _level: Level = Level.INFO) -> void:
 	pass

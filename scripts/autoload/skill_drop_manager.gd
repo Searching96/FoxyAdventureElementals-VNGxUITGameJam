@@ -1,6 +1,6 @@
 extends Node
 
-# ✅ 5 LEVELS - Controls which skills drop (not skill level!)
+# 5 LEVELS - Controls which skills drop (not skill level!)
 @export_group("Level Weights")
 @export var level1_weights: Array[float] = [70.0, 20.0, 10.0]  # 70% skill1, 20% skill2, 10% skill3
 @export var level2_weights: Array[float] = [50.0, 35.0, 15.0]
@@ -8,7 +8,7 @@ extends Node
 @export var level4_weights: Array[float] = [20.0, 35.0, 45.0]
 @export var level5_weights: Array[float] = [10.0, 30.0, 60.0]  # Heavy skill3
 
-# ✅ SKILLS REFERENCE - Multiple per element
+# Skills reference - Multiple per element
 var elemental_tables: Dictionary = {
 	ElementsEnum.Elements.FIRE: [
 		preload("res://scenes/skills/scripts/fire/Fireball.gd"),
@@ -42,10 +42,10 @@ var current_level: int = 0  # 0=Level1, 1=Level2, ..., 4=Level5
 signal level_changed(new_level: int)
 
 func _ready():
-	print("✅ SkillDropManager loaded %d elemental tables" % elemental_tables.size())
+	GameManager.logger.debug("SkillDropManager loaded %d elemental tables" % elemental_tables.size())
 	debug_print_tables()
 
-# ✅ Get skill weights by current level (0-4)
+# Get skill weights by current level (0-4)
 func _get_level_weights() -> Array[float]:
 	match current_level:
 		0: return level1_weights
@@ -55,7 +55,7 @@ func _get_level_weights() -> Array[float]:
 		4: return level5_weights
 		_: return [50.0, 30.0, 20.0]  # Default
 
-# ✅ Element → Weighted skill selection → Returns base skill resource
+# Element -> Weighted skill selection -> Returns base skill resource
 # Note: Skill power comes from SkillTreeManager level, NOT drop level
 func roll_skill_drop(enemy_element: int) -> Skill:
 	var rng = RandomNumberGenerator.new()
@@ -83,10 +83,10 @@ func roll_skill_drop(enemy_element: int) -> Skill:
 	# 3. Return base skill - NO LEVEL ASSIGNMENT
 	# The skill's power will come from SkillTreeManager.get_level(skill.name)
 	
-	print("🎲 Level%d %s → %s (%.0f%% drop chance)" % [
+	GameManager.logger.debug("Level%d %s -> %s (%.0f%% drop chance)" % [
 		current_level + 1,
 		ElementsEnum.Elements.keys()[enemy_element],
-		skill_resource.name, 
+		skill_resource.name,
 		weights[skill_index]
 	])
 	
@@ -97,8 +97,8 @@ func set_level(level: int):
 	level_changed.emit(current_level)
 	
 	var weights = _get_level_weights()
-	print("📊 Drop Level %d set (skill1:%.0f%% skill2:%.0f%% skill3:%.0f%%)" % [
-		level + 1, 
+	GameManager.logger.debug("Drop Level %d set (skill1:%.0f%% skill2:%.0f%% skill3:%.0f%%)" % [
+		level + 1,
 		weights[0], weights[1], weights[2]
 	])
 

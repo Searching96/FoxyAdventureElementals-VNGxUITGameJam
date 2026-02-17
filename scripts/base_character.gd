@@ -247,4 +247,24 @@ func take_damage(damage: int) -> void:
 	hurt.emit(); health_changed.emit()
 	if health <= 0: died.emit()
 
+## Check elemental relation: -1 = attacker restrains defender, 1 = attacker creates defender, 0 = neutral
+func check_element_relation(attacker_elem: int, defender_elem: int) -> int:
+	if restraint_table.has(attacker_elem) and defender_elem in restraint_table[attacker_elem]:
+		return -1
+	if creation_table.has(attacker_elem) and defender_elem in creation_table[attacker_elem]:
+		return 1
+	return 0
+
+## Calculate damage modified by elemental advantage/disadvantage.
+## Subclasses override _get_advantage_multiplier/_get_disadvantage_multiplier for different balancing.
+func calculate_elemental_damage(base_damage: float, attacker_element: int) -> float:
+	var relation = check_element_relation(attacker_element, elemental_type)
+	match relation:
+		-1: return base_damage * _get_advantage_multiplier()
+		1: return base_damage * _get_disadvantage_multiplier()
+	return base_damage
+
+func _get_advantage_multiplier() -> float: return 1.25
+func _get_disadvantage_multiplier() -> float: return 0.75
+
 func fire() -> void: pass

@@ -146,10 +146,7 @@ func _ready() -> void:
 	# Connect Signals
 	if fireball_hit_area:
 		fireball_hit_area.hitted.connect(_on_fireball_hit_enemy)
-	
-	#Dialogic.timeline_started.connect(func(): can_move = false)
-	#Dialogic.timeline_ended.connect(func(): can_move = true)
-	
+
 	# Initial Visual Setup
 	_hide_all_visuals()
 	if has_blade: equip_weapon(WeaponType.BLADE)
@@ -815,27 +812,10 @@ func _on_fireball_hit_enemy(_hurt_area: Area2D) -> void:
 		var bounce_force = 500.0
 		velocity = dir_away * bounce_force
 
-func calculate_elemental_damage(base: float, attacker_elem: int) -> float:
-	if attacker_elem == ElementsEnum.Elements.NONE: return base
-	
-	# Simplified Element Cycle
-	# Metal(1) > Wood(2) > Earth(5) > Water(3) > Fire(4) > Metal(1)
-	var advantages = {
-		ElementsEnum.Elements.METAL: [ElementsEnum.Elements.WOOD],
-		ElementsEnum.Elements.WOOD:  [ElementsEnum.Elements.EARTH],
-		ElementsEnum.Elements.EARTH: [ElementsEnum.Elements.WATER],
-		ElementsEnum.Elements.WATER: [ElementsEnum.Elements.FIRE],
-		ElementsEnum.Elements.FIRE:  [ElementsEnum.Elements.METAL]
-	}
-	
-	if advantages.has(attacker_elem) and elemental_type in advantages[attacker_elem]:
-		return base * 1.5 # Critical
-	if advantages.has(elemental_type) and attacker_elem in advantages[elemental_type]:
-		return base * 0.5 # Resist
-		
-	return base
+func _get_advantage_multiplier() -> float: return 1.5
+func _get_disadvantage_multiplier() -> float: return 0.5
 
-func handle_elemental_damage(elem: int) -> void:
+func handle_elemental_damage(_elem: int) -> void:
 	# Placeholder for status effects (Burn, Slow, etc)
 	pass
 
@@ -855,18 +835,18 @@ func load_state(data: Dictionary) -> void:
 	if "position" in data:
 		global_position = Vector2(data["position"][0], data["position"][1])
 	
-	# 1. Load Level của Wand TRƯỚC
+	# 1. Load wand level FIRST
 	if "wand_level" in data:
-		current_wand_level = data["wand_level"] # Set level trước
-		
-	# 2. Sau đó mới load quyền sở hữu và trang bị
+		current_wand_level = data["wand_level"]
+
+	# 2. Then load ownership and equip weapons
 	if "has_blade" in data:
 		has_blade = data["has_blade"]
 		if has_blade: equip_weapon(WeaponType.BLADE)
 		
 	if "has_wand" in data:
 		has_wand = data["has_wand"]
-		if has_wand: equip_weapon(WeaponType.WAND) # Lúc này nó mới check đúng current_wand_level
+		if has_wand: equip_weapon(WeaponType.WAND) # Now it checks the correct current_wand_level
 	
 	# Helper definitions for FSM/Animation use
 func cast_skill(anim_name: String) -> void:
@@ -901,10 +881,10 @@ func unstuck() -> void:
 		
 	# 1. First, check if we are actually stuck right now.
 	if not test_move(global_transform, Vector2.ZERO):
-		print("You aren't stuck! Request ignored.")
+		GameManager.logger.debug("Player is not stuck, unstuck request ignored")
 		return
 		
-	print("Stuck detected! Scanning for safe spot above...")
+	GameManager.logger.debug("Stuck detected! Scanning for safe spot above...")
 	# 2. Loop upwards to find a safe spot
 	for i in range(1, max_check_height + 1):
 		# Calculate the potential target position (moving up i tiles)
@@ -921,11 +901,11 @@ func unstuck() -> void:
 			# Found a safe spot! Teleport the player.
 			global_position.y -= offset_y
 			velocity = Vector2.ZERO # Stop any falling momentum
-			print("Teleported safely to ", i, " tiles up.")
+			GameManager.logger.debug("Teleported safely to %d tiles up" % i)
 			return
 
 	# 4. If the loop finishes and we found nothing (e.g. inside a massive wall)
-	print("Could not find a safe spot nearby.")
+	GameManager.logger.warn("Could not find a safe spot nearby")
 	
 
 # ==============================================================================
@@ -949,22 +929,15 @@ func move_to_scene_point(point_name: String) -> void:
 
 	# 2. Setup Movement State
 	actor_target_x = target_node.global_position.x
-	print(actor_target_x)
+	GameManager.logger.debug("Actor target x: %s" % str(actor_target_x))
 	is_actor_moving = true
 	
 	fsm.change_state(fsm.states.actor)
 	change_animation("run")
 	Dialogic.paused = true
-	
-	# 3. Switch FSM to Actor/Cutscene state to disable standard logic
-	# (Assuming 'actor' is the state name in your FSM)
-	#if fsm.has_state("actor"):
-		#fsm.change_state(fsm.states.actor)
 
 func _handle_actor_physics() -> void:
-	# Calculate distance to target
 	var dist = actor_target_x - global_position.x
-	#print(str(actor_target_x) + " " + str(global_position.x))
 	# if arrive then stop and resume dialogic
 	if abs(dist) < 5.0:
 		velocity.x = 0

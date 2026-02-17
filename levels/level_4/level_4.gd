@@ -1,7 +1,5 @@
-extends Node
+extends BaseLevelSetup
 
 func _ready() -> void:
-	GameManager.current_level = 4
-	if AudioManager:
-		AudioManager.play_music("music_background")
-		AudioManager.play_ambience("ambience_forest", -10)
+	level_number = 4
+	super._ready()

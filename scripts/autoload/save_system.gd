@@ -32,9 +32,9 @@ func save_game(slot_index: int, checkpoint_id: String, player_data: Dictionary, 
 	if file:
 		file.store_line(JSON.stringify(save_data))
 		file.close()
-		print("💾 Saved to Slot %d" % slot_index)
+		GameManager.logger.debug("Saved to Slot %d" % slot_index)
 	else:
-		push_error("❌ Failed to write to slot %d" % slot_index)
+		push_error("Failed to write to slot %d" % slot_index)
 
 # --- CORE: Load ---
 func load_game(slot_index: int) -> Dictionary:

@@ -20,8 +20,8 @@
 [ext_resource type="Texture2D" uid="uid://ci5tpl05cnmra" path="res://assets/island/background/small_cloud_1.png" id="18_f87us"]
 [ext_resource type="Texture2D" uid="uid://1t3pkyls8wyt" path="res://assets/island/background/small_cloud_2.png" id="19_2cvtw"]
 [ext_resource type="Texture2D" uid="uid://dcvs45slp2tv3" path="res://assets/island/background/small_cloud_3.png" id="20_8uqhp"]
-[ext_resource type="Shader" uid="uid://cn08g737h2o3b" path="res://shaders/water_refelection/water_refelection.gdshader" id="21_h0vp6"]
-[ext_resource type="Script" uid="uid://bihk4muna3fpl" path="res://shaders/water_refelection/water.gd" id="22_on5ak"]
+[ext_resource type="Shader" uid="uid://cn08g737h2o3b" path="res://shaders/water_reflection/water_reflection.gdshader" id="21_h0vp6"]
+[ext_resource type="Script" uid="uid://bihk4muna3fpl" path="res://shaders/water_reflection/water.gd" id="22_on5ak"]
 
 [sub_resource type="GDScript" id="GDScript_qkrtw"]
 script/source = "extends ParallaxLayer

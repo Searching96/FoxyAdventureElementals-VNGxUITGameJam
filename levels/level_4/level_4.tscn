@@ -182,7 +182,7 @@ texture = ExtResource("16_s6hm0")
 position = Vector2(-12, 5)
 
 [node name="Player" parent="." instance=ExtResource("2_tu7ib")]
-position = Vector2(22, 10)
+position = Vector2(7951, 872)
 max_health = 1000
 
 [node name="LightSource" type="Node2D" parent="Player"]

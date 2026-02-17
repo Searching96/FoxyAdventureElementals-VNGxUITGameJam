@@ -93,10 +93,7 @@ func _ready() -> void:
 	_init_start_position()
 	_init_particle()
 	_init_debuff()
-	
-	#current_debuff = Debuff.new(self)
-	#add_child(current_debuff)
-	
+
 	add_to_group("enemies")
 	
 	var minimap = GameManager.minimap
@@ -112,15 +109,13 @@ func _ready() -> void:
 	# Use global interval value
 	particle_audio_interval = SettingsManager.particle_audio_interval
 
-func _init_debuff():
+func _init_debuff() -> void:
 	if has_node("DebuffPlaceHolder"):
 		debuff_place_holder = $DebuffPlaceHolder
-		#if debuff_place_holder == null: print ("Please assign a debuff place holder for enemy")
-	#else: print ("Please assign a debuff place holder for enemy")
 	current_debuff = null
 
 # -- Initialize current values
-func _init_current_values():
+func _init_current_values() -> void:
 	current_movement_speed = movement_speed
 	current_movement_range = movement_range
 	current_jump_height = jump_height
@@ -129,11 +124,11 @@ func _init_current_values():
 	current_vulnerability = vulnerability
 
 # -- Initialize start position
-func _init_start_position():
+func _init_start_position() -> void:
 	start_position = position
 
 # -- Initialize material
-func _init_material():
+func _init_material() -> void:
 	shader_material = ShaderMaterial.new()
 	if shader_path == null: return
 	var my_shader = load(shader_path)
@@ -143,27 +138,25 @@ func _init_material():
 	var outline_color = elements_color[elemental_type]
 	if outline_color == null: return
 	shader_material.set("shader_parameter/line_color", outline_color)
-	pass
 
 # --- Initialize element outline
-func _update_element_outline():
+func _update_element_outline() -> void:
 	if animated_sprite == null: return
 	if animated_sprite.material != shader_material: animated_sprite.material = shader_material
-	pass
 
 func _check_changed_animation() -> void:
-	super._handle_visual_updates()
+	super._check_changed_animation()
 	_update_element_outline()
 
 # --- Initialize raycasts for wall/fall detection
-func _init_ray_cast():
+func _init_ray_cast() -> void:
 	if has_node("Direction/FrontRayCast2D"):
 		front_ray_cast = $Direction/FrontRayCast2D
 	if has_node("Direction/DownRayCast2D"):
 		down_ray_cast = $Direction/DownRayCast2D
 
 # --- Initialize raycasts for detecting player
-func _init_detect_player_raycast():
+func _init_detect_player_raycast() -> void:
 	if has_node("Direction/LeftDetectRayCast2D"):
 		left_detect_ray = $Direction/LeftDetectRayCast2D
 		left_detect_ray.target_position = Vector2(-sight, 0)
@@ -172,19 +165,19 @@ func _init_detect_player_raycast():
 		right_detect_ray.target_position = Vector2(sight, 0)
 
 # --- Initialize hurt area
-func _init_hurt_area():
+func _init_hurt_area() -> void:
 	if has_node("Direction/HurtArea2D"):
 		hurt_area = $Direction/HurtArea2D
 		hurt_area.hurt.connect(_on_hurt_area_2d_hurt)
 
 # --- Initialize hit area
-func _init_hit_area():
+func _init_hit_area() -> void:
 	if has_node("Direction/SpikeHitArea2D"):
 		spike_hit_area = $Direction/SpikeHitArea2D
 		spike_hit_area.damage = spike
 		spike_hit_area.elemental_type = elemental_type
 
-func _init_particle():
+func _init_particle() -> void:
 	if has_node("Particles"):
 		var particle_holder = $Particles
 		if particle_holder.get_child_count() == 0:
@@ -221,7 +214,7 @@ func _apply_particle_quality() -> void:
 func _on_particle_quality_changed(_quality: int) -> void:
 	_apply_particle_quality()
 
-func _setup_particle_audio():
+func _setup_particle_audio() -> void:
 	if not AudioManager or not AudioManager.audio_database:
 		return
 	
@@ -346,7 +339,7 @@ func is_can_fall() -> bool:
 	return down_ray_cast != null and not down_ray_cast.is_colliding()
 
 
-func _process(delta):
+func _process(delta: float) -> void:
 	if not is_visible_in_tree():
 		return
 
@@ -359,10 +352,9 @@ func _physics_process(delta: float) -> void:
 func process_debuff(delta: float) -> void:
 	if current_debuff == null: return
 	current_debuff._update(delta)
-	pass
 
 # --- Check player detection via raycast
-func _check_player_in_sight():
+func _check_player_in_sight() -> void:
 	var detected_player := _get_player_from_raycasts()
 	
 	if detected_player != found_player:
@@ -390,12 +382,10 @@ func _get_player_from_raycasts() -> Player:
 
 # --- Called when player is in sight
 func _on_player_in_sight(_player_pos: Vector2) -> void:
-	#print("Player detected at:", _player_pos)
 	pass
 
 # --- Called when player is not in sight
 func _on_player_not_in_sight() -> void:
-	#print("Player lost from sight")
 	pass
 
 # --- When enemy takes damage
@@ -403,8 +393,8 @@ func _on_hurt_area_2d_hurt(_direction: Vector2, _damage: float, _elemental_type:
 	var modified_damage = calculate_elemental_damage(_damage, _elemental_type)
 	modified_damage += ceilf(modified_damage * current_vulnerability)
 	
-	var is_critical = (check_element(_elemental_type, elemental_type) == -1)
-	print("my element: " + str(elemental_type) + " enemy: " + str(_elemental_type) + " is critical: " + str(is_critical))
+	var is_critical = (check_element_relation(_elemental_type, elemental_type) == -1)
+	GameManager.logger.debug("Element check - mine: %s, attacker: %s, critical: %s" % [str(elemental_type), str(_elemental_type), str(is_critical)])
 	DamageNumbers.display_number(modified_damage, damage_number_origin.global_position, is_critical)
 	
 	if (fsm.current_state != null): 
@@ -430,32 +420,11 @@ func _on_hurt_area_2d_hurt(_direction: Vector2, _damage: float, _elemental_type:
 		# 3. Get level and apply logic
 		if skill_name != "":
 			var skill_level = SkillTreeManager.get_level(skill_name)
-			print("Source skill (%s) level: %d" % [skill_name, skill_level])
+			GameManager.logger.debug("Source skill (%s) level: %d" % [skill_name, skill_level])
 			
 			if skill_level >= skill_level_to_debuff:
 				handle_elemental_damage(_elemental_type)
 
-func calculate_elemental_damage(base_damage: float, attacker_element: int) -> float:
-	var check_element = check_element(attacker_element, elemental_type)
-	match check_element:
-		# Bị khắc
-		-1: return base_damage * 1.25
-		# Không sinh khắc
-		0: return base_damage
-		# Được sinh
-		1: return base_damage * 0.75
-	
-	return base_damage
-
-func check_element(elemental_type_1: ElementsEnum.Elements, elemental_type_2: ElementsEnum.Elements) -> int:
-	# 1 khắc 2
-	if (restraint_table.has(elemental_type_1) and restraint_table[elemental_type_1].has(elemental_type_2)):
-		return -1
-	# 1 sinh 2
-	if (creation_table.has(elemental_type_1) and creation_table[elemental_type_1].has(elemental_type_2)):
-		return 1
-	# Không sinh khắc
-	return 0
 
 func handle_elemental_damage(attacker_element: ElementsEnum.Elements) -> void:
 	var debuff_scene: PackedScene = null
@@ -466,48 +435,43 @@ func handle_elemental_damage(attacker_element: ElementsEnum.Elements) -> void:
 
 
 func apply_burn_effect() -> void:
-	# Có thể thêm hiệu ứng lửa (burn status, animation, etc)
-	print("Burn")
-	pass
+	# Can add fire effect (burn status, animation, etc)
+	GameManager.logger.debug("Burn effect applied to %s" % name)
 
 func apply_freeze_effect() -> void:
-	# Có thể thêm hiệu ứng đất (slow, knockback, etc)
-	print("Freeze")
-	pass
+	# Can add earth effect (slow, knockback, etc)
+	GameManager.logger.debug("Freeze effect applied to %s" % name)
 
 func apply_stun_effect() -> void:
-	# Có thể thêm hiệu ứng nước (freeze, slow, etc)
-	print("Stunned")
-	pass
+	# Can add water effect (freeze, slow, etc)
+	GameManager.logger.debug("Stun effect applied to %s" % name)
 
 func apply_poison_effect() -> void:
-	print("Poisoned")
-	pass
-	
+	GameManager.logger.debug("Poison effect applied to %s" % name)
+
 func apply_weakness_effect() -> void:
-	print("Weakness")
-	pass
+	GameManager.logger.debug("Weakness effect applied to %s" % name)
 
 
 # --- Apply damage through FSM
-func _take_damage_from_dir(_damage_dir: Vector2, _damage: float):
+func _take_damage_from_dir(_damage_dir: Vector2, _damage: float) -> void:
 	fsm.current_state.take_damage(_damage_dir, _damage)
 
 # -- Disable collision, enemy will no longer has collision with player
-func disable_collision():
+func disable_collision() -> void:
 	collision_layer = 0
 	if spike_hit_area != null and spike_hit_area.has_node("CollisionShape2D"):
 		spike_hit_area.get_node("CollisionShape2D").disabled = true
 	if hurt_area != null and hurt_area.has_node("CollisionShape2D"):
 		hurt_area.get_node("CollisionShape2D").disabled = true
 
-# Enemy bị hút vào vùng nổ
+# Enemy pulled into explosion zone
 func enter_tornado(tornado_pos: Vector2) -> void:
-	# 1. Thiết lập trạng thái
+	# 1. Set up state
 	is_movable = false
 	velocity = Vector2.ZERO
 	
-	# 3. Bắt đầu hiệu ứng "bay lên"
+	# 3. Start "fly up" effect
 	var target_pos = tornado_pos + Vector2(0, -30)
 	var duration = 0.5
 	
@@ -520,19 +484,19 @@ func enter_tornado(tornado_pos: Vector2) -> void:
 		duration
 	).set_trans(Tween.TRANS_SPRING).set_ease(Tween.EASE_OUT)
 	
-# Enemy bị hút vào vùng nổ
+# Enemy enters stun zone
 func enter_stun(stun_pos: Vector2) -> void:
-	# 1. Thiết lập trạng thái
+	# 1. Set up state
 	is_movable = false
 	velocity = Vector2.ZERO
 
-# Khi rời khỏi
+# When exiting skill effect
 func exit_skill() -> void:
-	# Khôi phục khả năng di chuyển
+	# Restore movement ability
 	is_movable = true
 	velocity = Vector2.ZERO
 	
-func apply_knockback(knockback_vec: Vector2):
+func apply_knockback(knockback_vec: Vector2) -> void:
 	velocity = knockback_vec
 	ignore_gravity = true
 	await get_tree().create_timer(0.25).timeout
@@ -540,13 +504,13 @@ func apply_knockback(knockback_vec: Vector2):
 	
 	
 # Add to ALL Enemy scripts:
-func scale_health(multiplier: float):
+func scale_health(multiplier: float) -> void:
 	if not has_node("EnemyHealthBar"): return  # Safety check
 	max_health *= multiplier
 	health = max_health
-	print("💚 %s: %.0fHP (x%.1f)" % [name, max_health, multiplier])
+	GameManager.logger.debug("%s: %.0fHP (x%.1f)" % [name, max_health, multiplier])
 
-func _exit_tree():
+func _exit_tree() -> void:
 	# 3. Clean up when enemy dies so the icon disappears immediately
 	var minimap = get_tree().get_first_node_in_group("Minimap")
 	if minimap:
@@ -554,7 +518,7 @@ func _exit_tree():
 
 # Functions for debuff
 func set_debuff(debuff_scene: PackedScene) -> void:
-	print("debuff: " + str(debuff_scene))
+	GameManager.logger.debug("Debuff applied: %s" % str(debuff_scene))
 	if current_debuff != null: return
 	if debuff_scene == null: return
 	if debuff_place_holder == null: return
@@ -573,17 +537,12 @@ func remove_debuff(debuff: Debuff) -> void:
 		current_debuff = null
 
 func set_is_blind(value: bool) -> void:
-	if value == true:
-		if front_ray_cast != null: front_ray_cast.enabled = false
-		#if down_ray_cast != null: down_ray_cast.enabled = false
-		if right_detect_ray != null: right_detect_ray.enabled = false
-		if left_detect_ray != null: left_detect_ray.enabled = false
+	var enabled = not value
+	if front_ray_cast != null: front_ray_cast.enabled = enabled
+	if right_detect_ray != null: right_detect_ray.enabled = enabled
+	if left_detect_ray != null: left_detect_ray.enabled = enabled
+	if value:
 		found_player = null
-	else:
-		if front_ray_cast != null: front_ray_cast.enabled = true
-		#if down_ray_cast != null: down_ray_cast.enabled = true
-		if right_detect_ray != null: right_detect_ray.enabled = true
-		if left_detect_ray != null: left_detect_ray.enabled = true
 
 func set_vulnerability(value: float) -> void:
 	current_vulnerability = value
@@ -591,10 +550,7 @@ func reset_vulnerability() -> void:
 	current_vulnerability = vulnerability
 	
 func freeze_in_place(value: bool) -> void:
-	#if value == true: current_movement_speed = 0
-	#else: current_movement_speed = movement_speed
 	is_frozen = value
 	velocity.x = 0
 	if animated_sprite != null:
-		if value == true: animated_sprite.speed_scale = 0
-		else: animated_sprite.speed_scale = 1
+		animated_sprite.speed_scale = 0 if value else 1

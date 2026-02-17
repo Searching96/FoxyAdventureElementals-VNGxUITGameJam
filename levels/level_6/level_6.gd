@@ -1,4 +1,6 @@
-extends Node
+extends BaseLevelSetup
 
 func _ready() -> void:
-	GameManager.current_level = 6
+	level_number = 6
+	play_audio = false
+	super._ready()
